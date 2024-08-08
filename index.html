@@ -1,1 +1,133 @@
+<html>
+<div>
+	<label>choose board size</label>
+	<input type="number" id="width" min="10" max="30" value="10" />
+	<input type="number" id="height"  min="10" max="30" value="10"  />
+</div>
+<div>
+	<label>mines</label>
+	<input type="number" id="minesqty" min="10" max="20" value="10" />
+</div>
+<div>
+	<input type="button" value="generate" onclick="return generateBoard()" />
+</div>
 
+<div id="board" style="margin-left:auto; margin-right: auto">
+</div>
+</html>
+<script type="text/javascript">
+var config = {};
+config['searchradius'] = 1;
+config['']
+var mines_xy = []
+function generateBoard(width, height, qty)
+{
+	width = document.getElementById('width').value;
+	height = document.getElementById('height').value;
+	qty = document.getElementById('minesqty').value;
+	var board = '';
+	mines_xy = generateMine(qty);
+	
+	for(let y = 0; y < width; y++)// vertical
+	{
+		for(let x = 0; x < height; x++)//horizontal
+		{
+			let temp = x + '_' + y;
+			if(mines_xy.includes(temp))
+			{
+				board += '<input type="button" id="'+x+''+y+'" bomb="true" style="width:20px; height:20px; float:left; text-align: center" onclick="return browse(this)" />';
+			}
+			else
+			{
+				board += '<input type="button" id="'+x+''+y+'" info="'+checkMinesAround(x,y,width,height)+'" style="width:20px; height:20px; float:left" onclick="return browse(this)" />';
+			}
+		}
+		board += '<br clear="all" />';
+	}
+	document.getElementById('board').innerHTML = board;
+}
+function checkMinesAround(x, y, width, height)
+{
+	var mines = 0;
+	
+	if(x - 1 >= 0 && isMine((x-1)+'_'+y)) // check left
+		mines++;
+	
+	if(x + 1 < width && isMine((x+1)+'_'+y)) // check right
+		mines++;
+	
+	if(y - 1 >= 0 && isMine((x)+'_'+(y-1))) // check top
+		mines++;
+	
+	if(y + 1 < height && isMine((x)+'_'+(y+1))) // check bottom
+		mines++;
+	
+	// diagonal check here
+	if(x - 1 >= 0 && y - 1 >= 0 && isMine( (x - 1) + '_' + (y - 1))) // top left
+		mines++;
+	
+	if(x + 1 < width && y - 1 >= 0 && isMine( (x + 1) + '_' + (y - 1))) // top right
+		mines++;
+	
+	if(x - 1 >= 0 && y + 1 < height && isMine( (x - 1) + '_' + (y + 1))) // bottom left
+		mines++;
+	
+	if(x + 1 < width && y + 1 < height && isMine( (x + 1) +'_' + (y + 1))) // bottom right
+		mines++;
+	
+	return mines;
+}
+function isMine(key)
+{
+	return mines_xy.includes(key);
+}
+function generateMine(qty)
+{
+	var generated = 0;
+	var coordinate = [];
+	let max_try = 100;
+	var i = 0;
+	while(generated < qty && i < max_try)
+	{
+		let x = Math.floor(Math.random() * qty)
+		let y = Math.floor(Math.random() * qty)
+		var temp = x.toString() + '_'+ y.toString();
+		if(coordinate.length == 0)
+		{
+			coordinate[generated] = temp;
+			generated++;
+		}
+		else if(!coordinate.includes(temp))
+		{
+			coordinate[generated] = temp;
+			generated++;
+		}
+		i++;
+	}
+	console.log(coordinate);
+	return coordinate;
+	//console.log(i + 'retry');
+}
+function browse(key)
+{
+	if(key.getAttribute('bomb'))
+	{
+		key.value = 'X';
+	}
+	else if(key.getAttribute('info'))
+	{
+		key.value = key.getAttribute('info');
+		if(key.value == 0)
+		{
+			
+		}
+	}
+	key.disabled = true;
+}
+
+function deepbrowse()
+{
+	
+}
+
+</script>
