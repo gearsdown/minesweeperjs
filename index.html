@@ -10,6 +10,7 @@
 </div>
 <div>
 	<input type="button" value="generate" onclick="return generateBoard()" />
+	<input type="button" value="reveal" onclick="return revealAll()" />
 </div>
 
 <div id="board" style="margin-left:auto; margin-right: auto">
@@ -18,10 +19,30 @@
 <script type="text/javascript">
 var config = {};
 config['searchradius'] = 1;
-config['']
-var mines_xy = []
+config['width'] = 0;
+config['height'] = 0;
+config['button'] = [];
+config['button']['width'] = '23px';
+config['button']['height'] = '23px';
+
+var mines_xy = [];
+var arrayBoard = [];
+var arrayChecker = [];
+function revealAll()
+{
+	for(let y = 0; y < config['height']; y++)
+	{
+		for(let x = 0; x < config['width']; x++)
+		{
+			document.getElementById(x + '_' + y).value = document.getElementById(x + '_' + y).getAttribute('info');
+			document.getElementById(x + '_' + y).disabled = true;
+		}
+	}
+}
 function generateBoard(width, height, qty)
 {
+	config['width'] = document.getElementById('width').value;
+	config['height'] = document.getElementById('height').value;
 	width = document.getElementById('width').value;
 	height = document.getElementById('height').value;
 	qty = document.getElementById('minesqty').value;
@@ -30,21 +51,25 @@ function generateBoard(width, height, qty)
 	
 	for(let y = 0; y < width; y++)// vertical
 	{
+		arrayBoard[y] = [];
 		for(let x = 0; x < height; x++)//horizontal
 		{
 			let temp = x + '_' + y;
 			if(mines_xy.includes(temp))
 			{
-				board += '<input type="button" id="'+x+''+y+'" bomb="true" style="width:20px; height:20px; float:left; text-align: center" onclick="return browse(this)" />';
+				arrayBoard[y][x] = 10;
+				board += '<input type="button" id="'+x+'_'+y+'" info="X" style="'+btnStyle()+'" onclick="return browse(this,'+width+','+height+')" />';
 			}
 			else
 			{
-				board += '<input type="button" id="'+x+''+y+'" info="'+checkMinesAround(x,y,width,height)+'" style="width:20px; height:20px; float:left" onclick="return browse(this)" />';
+				arrayBoard[y][x] = checkMinesAround(x,y,width,height);
+				board += '<input type="button" id="'+x+'_'+y+'" info="'+checkMinesAround(x,y,width,height)+'" style="'+btnStyle()+'" onclick="return browse(this,'+width+','+height+')" />';
 			}
 		}
 		board += '<br clear="all" />';
 	}
 	document.getElementById('board').innerHTML = board;
+	console.log(arrayBoard);
 }
 function checkMinesAround(x, y, width, height)
 {
@@ -104,30 +129,77 @@ function generateMine(qty)
 		}
 		i++;
 	}
+	// coordinate = ['5_1', '0_8', '1_2', '9_7', '9_6', '1_8', '6_9', '4_2', '4_5', '5_3']
 	console.log(coordinate);
 	return coordinate;
 	//console.log(i + 'retry');
 }
-function browse(key)
+function browse(key, width, height)
 {
-	if(key.getAttribute('bomb'))
+	key.value = key.getAttribute('info');
+	if(key.value == 0)
 	{
-		key.value = 'X';
+		var x = parseInt((key.getAttribute('id')).split('_')[0]);
+		var y = parseInt((key.getAttribute('id')).split('_')[1]);
+		// console.log(x);
+		// console.log(y);
+		deepbrowse(x, y, width, height);
 	}
-	else if(key.getAttribute('info'))
-	{
-		key.value = key.getAttribute('info');
-		if(key.value == 0)
-		{
-			
-		}
-	}
+
 	key.disabled = true;
 }
-
-function deepbrowse()
+function checkNOpen(x, y)
 {
+	document.getElementById(x + '_' + y).value = document.getElementById(x + '_' + y).getAttribute('info');
+	document.getElementById(x + '_' + y).disabled = true;
+	if(document.getElementById(x + '_' + y).getAttribute('info') && document.getElementById(x + '_' + y).getAttribute('info') == 0){
+		if(!arrayChecker.includes(x + '_' + y))
+		{
+			arrayChecker.push(x + '_' + y);
+			deepbrowse(x, y, config['width'], config['height']);
+		}
+		return 1;
+	}
+	else
+		return 0; 
+}
+function deepbrowse(x, y, width, height)
+{
+	// circling method
+	var run = 0;
+	if(x - 1 >= 0 ) // check left
+		checkNOpen((x-1), y);
 	
+	if(x + 1 < width ) // check right
+		checkNOpen((x+1),y);
+	
+	if(y - 1 >= 0 ) // check top
+		checkNOpen((x),(y-1));
+	
+	if(y + 1 < height ) {// check bottom
+		checkNOpen((x),(y+1));
+	}
+	// diagonal check here
+	if(x - 1 >= 0 && y - 1 >= 0 ) // top left
+		checkNOpen( (x - 1) , (y - 1));
+	
+	if(x + 1 < width && y - 1 >= 0) // top right
+		checkNOpen( (x + 1), (y - 1));
+	
+	if(x - 1 >= 0 && y + 1 < height) // bottom left
+		checkNOpen( (x - 1), (y + 1));
+	
+	if(x + 1 < width && y + 1 < height) // bottom right
+		checkNOpen( (x + 1), (y + 1));
+}
+
+function btnStyle()
+{
+	var style  = 'height: ' + config['button']['height'] + ';';
+	style += 'width: ' + config['button']['width'] + ';';
+	style += 'float: left;';
+	style += 'text-align: center;';
+	return style;
 }
 
 </script>
