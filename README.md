@@ -6,4 +6,4 @@ easy game minesweeper, created with javascript.
 generate board and mindes
 
 2024-08-09
-adding deep browse to scan surround mines and empty area
+* adding deep browse to scan surround mines and empty area
